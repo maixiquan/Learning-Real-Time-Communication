@@ -1,0 +1,118 @@
+<html>
+    <head>
+            <title>
+                "Learning Real-Time Communication"
+            </title>
+            <script type='text/javascript' src='https://cdn.scaledrone.com/scaledrone.min.js'></script>
+            <meta charset="utf-8">
+            <style>
+                .none{ -webkit-filter: node;}
+                .blur{ -webkit-filter: blur(3px);}
+                .grayscale{ -webkit-filter: grayscale(1);}
+                .invert{ -webkit-filter: invert(1);}
+                .sepia{ -webkit-filter: sepia(1);}
+
+                video {
+                  max-width: calc(50% - 100px);
+                  margin: 0 50px;
+                  box-sizing: border-box;
+                  border-radius: 2px;
+                  padding: 0;
+                  box-shadow: rgba(156, 172, 172, 0.2) 0px 2px 2px, rgba(156, 172, 172, 0.2) 0px 4px 4px, rgba(156, 172, 172, 0.2) 0px 8px 8px, rgba(156, 172, 172, 0.2) 0px 16px 16px, rgba(156, 172, 172, 0.2) 0px 32px 32px, rgba(156, 172, 172, 0.2) 0px 64px 64px;
+                }
+                .copy {
+                  position: fixed;
+                  top: 10px;
+                  left: 50%;
+                  transform: translateX(-50%);
+                  font-size: 16px;
+                  color: rgba(0, 0, 0, 0.5);
+                }
+              </style>
+    </head>
+    <body>
+                <div>
+                        <lable>为中华崛起而读书！</lable>
+                </div>
+                <table align = "cernt">
+                    <tr>
+                        <td>
+                            <label>UserName: </label>
+                            <input type = text id = "username"></input>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>room: </label>
+                            <input type = text id = "room"></input>
+                            <button id = "connect">Connect(Please wait until gray)</button>
+                            <button id = "leave">Leave</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Context: </label><br>
+                            <textarea disable id = "output" row = "10" cols="50"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>Input: </label><br>
+                            <textarea disable id = "input" row ="3" cols="50"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button id = "send">Send</button>
+                        </td>
+                    </tr>
+                </table>
+                <div>
+                    <lable>audio input device:</lable>
+                    <select id="audioSource"></select>
+                </div>
+                <div>
+                    <lable>audio output device:</lable>
+                    <select id="audioOutput"></select>
+                </div>
+                <div>
+                    <lable>video input device:</lable>
+                    <select id="videoSource"></select>
+                </div>
+                <div>
+                    <lable>Filter:</lable>
+                    <select id="filter">
+                          <option value = "none">None</option>
+                          <option value = "blur">Blur</option>
+                          <option value = "grayscale">Grayscale</option>
+                          <option value = "invert">Invert</option>
+                          <option value = "sepia">Sepia</option>
+                    </select>
+                </div>
+                <table>
+                    <tr>
+                        <audio id="localaudio" controls autoplay></audio>
+                        <video id="localVideo" autoplay></video>
+                        <div id = "constraints" class = "output"></div>
+                    </tr>
+                    <tr>
+                        <audio id="remoteaudio" controls autoplay></audio>
+                        <video id="remoteVideo" autoplay></video>
+                    </tr>
+                </table>
+                <div>
+                    <button id = "snapshotlocal">Take snapshout local</button>
+                    <button id = "snapshotremote">Take snapshout remote</button>
+                </div>
+                <div>
+                    <canvas id = "picturelocal" width="480" height="320"></canvas>
+                </div>
+                <div>
+                    <canvas id = "pictureremote" width="480" height="320"></canvas>
+                </div>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+                <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+                <script src="./client.js"></script>
+    </body>
+
+</html>
