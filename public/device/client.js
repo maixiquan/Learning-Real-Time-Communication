@@ -28,11 +28,17 @@ var outputArea = document.querySelector("textarea#output");
 outputArea.disabled = true;
 var inputArea = document.querySelector("textarea#input");
 var btnSend = document.querySelector("button#send");
-
+//call
+var btnStart = document.querySelector("button#start");
+var btnCall = document.querySelector("button#call");
+var btnHangUp = document.querySelector("button#hangup");
 
 var socketchat;
+var localStream;
 var room;
 var data
+var pc1;
+var pc2;
 btnConnect.onclick = ()=>{
     //connect
     socketchat=io.connect();
@@ -152,6 +158,63 @@ function startgetUserMedia()
             .catch(handleError);//异步
     }
 }
+//
+function getOffer(desc){
+    pc1.setLocalDescription(desc);
+    //send desc to signal
+    //receive desc from signal
+    pc2.setRemoteDescription(desc);
+    //远端应答
+    pc2.createAnswer()
+                .then(getAnswer)
+                .catch(handleAnswerError);
+}
+btnStart.onclick = start;
+btnCall.onclick = call;
+btnHangUp.onclick = hangup;
+
+//getAnswer
+function getAnswer(desc){
+    pc2.setLocalDescription(desc);
+    //send desc to signal
+    //receive desc from signal
+    pc1.setRemoteDescription(desc);
+}
+//启动RTCPeerConnection
+function call(){
+    pc1=new RTCPeerConnection();
+    pc2=new RTCPeerConnection();
+    pc1.onicecandidate = (e)=>{
+        pc2.addIceCandidate(e.candidate).catch(handleError);
+    }
+    pc2.onicecandidate = (e)=>{
+        pc2.addIceCandidate(e.candidate);
+    }
+    pc2.ontrack = getRemoteStream;//数据通了的话，获取remote端视频流
+    var offerOptions = {
+        offerToRecieveAudio : 0,
+        offerToRecieveVideo : 1,
+    }
+    localStream.getTracks().forEach((track)=>{
+		pc1.addTrack(track, localStream);
+	});
+    //媒体协商
+    pc1.createOffer(offerOptions)
+                    .then(getOffer)
+                    .catch(handleOfferError);
+}
+//关闭
+function hangup(){
+    pc1.close();
+    pc2.close();
+    pc1 = null;
+    pc2 = null;
+}
+//获取对端流
+function getRemoteStream(e){
+    remotevideoplay.srcObject = e.streams[0];
+}
+
 function gotDevices(deviceInfos){
 	deviceInfos.forEach( 
         function(deviceInfo)
@@ -178,10 +241,19 @@ function gotMediaStream(stream) {
     var videoConstraints = videoTrack.getSettings();//取第一个视频轨的参数
     divConstraints.textContent = JSON.stringify(videoConstraints,null,2);//转成字符串
     localaudioplay.srcObject = stream;
-    return navigator.mediaDevices.enumerateDevices();
+    localStream = stream;
+    //return navigator.mediaDevices.enumerateDevices();
 }
 function handleError(err){
 	console.log(err.name + " : " + err.message);
+}
+function handleOfferError(err){
+    console.log('Failed to create offer: ',err);
+    console.log(err.name + " : " + err.message);
+}
+function handleAnswerError(err){
+    console.log('Failed to create answer: ',err);
+    console.log(err.name + " : " + err.message);
 }
 //访问用户媒体设备的兼容方法
 function getUserMedia(constraints, success, error) {

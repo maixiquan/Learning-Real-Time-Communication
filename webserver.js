@@ -7,6 +7,8 @@ var fs = require('fs');
 var express = require('express');
 var serveIndex = require('serve-index');
 var socketIo = require('socket.io');
+var USERCOUNT = 3;
+
 //打log
 var log4js = require('log4js');
 log4js.configure({
@@ -46,19 +48,19 @@ var io = socketIo.listen(https_server);
 
 //信令服务器
 io.sockets.on('connection',(socket)=>{
-	socket.on('message', (room, data)=>{
-		//socket.to(room).emit('message', room, data)//房间内所有人,除自己外
-		io.in(room).emit('message', room, data)//房间内所有人
+	socket.on('message', (room, data)=>{//信息中转
+		socket.to(room).emit('message', room, data)//房间内所有人,除自己外
+		//io.in(room).emit('message', room, data)//房间内所有人
 	});
 	socket.on('join',(room)=>{
 		socket.join(room);
-		var myroom = io.sockets.adapter.rooms[room];//在数组中找房间号
-		var users = Object.keys(myroom.sockets).length;
+		var myRoom = io.sockets.adapter.rooms[room];//在数组中找房间号
+		var users = (myRoom)? Object.keys(myRoom.sockets).length : 0;
 		logger.log('the number of user in room is' + users);
 		//在这里可以控制进入房间的人数,现在一个房间最多 2个人
 		//为了便于客户端控制，如果是多人的话，应该将目前房间里
 		//人的个数当做数据下发下去。
-		/*if(users < 3) {
+		if(users < USERCOUNT) {
 			socket.emit('joined', room, socket.id);	
 			if (users > 1) {
 				socket.to(room).emit('otherjoin', room);//除自己之外
@@ -66,19 +68,21 @@ io.sockets.on('connection',(socket)=>{
 		}else {
 			socket.leave(room);
 			socket.emit('full', room, socket.id);	
-		}*/
+		}
 	 	//socket.to(room).emit('joined', room, socket.id);//除自己之外
-		io.in(room).emit('joined', room, socket.id)//房间内所有人
+		//io.in(room).emit('joined', room, socket.id)//房间内所有人
 	 	//socket.broadcast.emit('joined', room, socket.id);//除自己，全部站点
 	});
 	socket.on('leave',(room)=>{
-		var myroom = io.sockets.adapter.rooms[room];//在数组中找房间号
-		var users = Object.keys(myroom.sockets).length;
+		var myRoom = io.sockets.adapter.rooms[room];//在数组中找房间号
+		var users = (myRoom)? Object.keys(myRoom.sockets).length : 0;
 		logger.log('the number of user in room is' + users-1);//user-1
-		socket.leave(room);
+		//socket.leave(room);
 		//socket.emit('leaved',room,socket.id);//
-		//socket.to(room).emit('leaved',room,socket.id);//除自己外
-		io.in(room).emit('leaved',room,socket.id);//所有人
+		//.to(room).emit('bye',room,socket.id);
+		socket.to(room).emit('bye', room, socket.id);
+		socket.emit('leaved', room, socket.id);
+		//io.in(room).emit('leaved',room,socket.id);//所有人
 		//socket.broadcast.emit('leaved',room,socket.id);//给站点所有人发，除自己
 	});
 });
