@@ -1,4 +1,7 @@
 # Learning-Real-Time-Communication
+启动：
+turnserver -v -r 207.246.74.80:3478 -a -o -c ../etc/turnserver.conf
+nodejs webserver.js
 
 ![image](https://user-images.githubusercontent.com/53896111/122022772-8103e900-cdf9-11eb-80e1-719c899eaf3e.png)
 
